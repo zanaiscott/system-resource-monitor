@@ -70,3 +70,68 @@ def get_disk_usage():
             "total_gb": bytes_to_gb(disk.total),
         }
         return disk_info
+
+def get_resource_summary():
+    memory = get_memory_usage()
+    disk = get_disk_usage()
+    summary = {
+        "cpu_percent": get_cpu_usage(),
+        "memory_percent": memory["percent"],
+        "memory_used_gb": memory["used_gb"],
+        "memory_total_gb": memory["total_gb"],
+        "disk_percent": disk["percent"],
+        "disk_used_gb": disk["used_gb"],
+        "disk_total_gb": disk["total_gb"],
+    }
+    return summary
+
+def display_resource_summary(summary):
+    print("Current System Status")
+    print("-" * 30)
+    print(f"CPU Usage: {summary['cpu_percent']}%")
+    print(f"Memory Usage: {summary['memory_percent']}% ({summary['memory_used_gb']} GB used of {summary['memory_total_gb']} GB)")
+    print(f"Disk Usage: {summary['disk_percent']}% ({summary['disk_used_gb']} GB used of {summary['disk_total_gb']} GB)")
+    print(f"Total Disk: {summary['disk_total_gb']:.2f} GB")
+
+Thresholds = {
+        "cpu": 80,
+        "memory": 80,
+        "disk": 90,
+    }
+
+def check_status(value, threshold):
+    if value > threshold:
+        return "High"
+    return "OK"
+
+def get_statuses(summary):
+    statuses = {
+        "cpu" : check_status(summary["cpu_percent"], Thresholds["cpu"]),
+        "memory" : check_status(summary["memory_percent"], Thresholds["memory"]),
+        "disk" : check_status(summary["disk_percent"], Thresholds["disk"]),
+    }
+    return statuses
+
+colors = []
+colors.append("red")
+colors.append("blue")
+print(colors)
+
+def get_warnings(summary):
+    warnings = []
+    statuses = get_statuses(summary)
+    if statuses["cpu"] == "High":
+        warnings.append("Warning: CPU usage is high!")
+    if statuses["memory"] == "High":
+        warnings.append("Warning: Memory usage is high!")
+    if statuses["disk"] == "High":
+        warnings.append("Warning: Disk usage is high!")
+    return warnings
+def display_warnings(summary):
+    warnings = get_warnings(summary)
+    if len(warnings) == 0:
+        print("All resources are within normal limits.")
+    else:
+        for warning in warnings:
+            print(warning)
+
