@@ -36,4 +36,3 @@ def save_snapshot(summary):
             writer.writeheader()
         writer.writerow(row)
         return row
-    
