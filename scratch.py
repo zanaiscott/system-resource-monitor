@@ -1,6 +1,10 @@
 import monitor
+import logger
 
 summary = monitor.get_resource_summary()
-print("Statuses:", monitor.get_statuses(summary))
-monitor.display_warnings(summary)
+path = logger.save_snapshot(summary)
+print("Saved to:", path)
+path = logger.save_snapshot(summary)
+print("Saved to:", path)
+
 

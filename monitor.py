@@ -135,3 +135,76 @@ def display_warnings(summary):
         for warning in warnings:
             print(warning)
 
+REFRESH_SECONDS = 2
+
+def clear_screen():
+    if os.name == "nt":
+        os.system("cls")
+    else:
+        os.system("clear")
+        
+
+def display_live_screen(summary):
+    statuses = get_statuses(summary)
+    print("=" * 30)
+    print("TB System Resource Monitor")
+    print("=" * 30)
+    print()
+    print(f"CPU Usage: {summary['cpu_percent']}%")
+    print(f"Memory Usage: {summary['memory_percent']}%")
+    print(f"Disk Usage: {summary['disk_percent']}%")
+    print()
+    print("Status:")
+    print(f"CPU: {statuses['cpu']}")
+    print(f"Memory: {statuses['memory']}")
+    print(f"Disk: {statuses['disk']}")
+    print()
+    print("Press Ctrl+C to stop monitoring.")
+def start_live_monitoring():
+    try:
+        while True:
+            summary = get_resource_summary()
+            clear_screen()
+            display_live_screen(summary)
+            time.sleep(REFRESH_SECONDS)
+    except KeyboardInterrupt:
+        print()
+        print("Live monitor stopped. Returning to the menu...")
+
+def get_memory_value(process_info):
+    return process_info["memory_percent"]
+
+def get_top_processes(limit=5):
+    processes = []
+    for process in psutil.process_iter(['pid', 'name', 'memory_percent']):
+        try:
+            process_info = {
+                "pid": process.info['pid'],
+                "name": process.info['name'],
+                "memory_percent": process.info['memory_percent'],
+            }
+            processes.append(process_info)
+
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+
+    processes.sort(key=get_memory_value, reverse=True)
+    return processes[:limit]
+
+def display_top_processes(limit=5):
+    top_processes = get_top_processes(limit)
+    print()
+    print("Top Processes by Memory")
+    print()
+    print(f"{'PID':<8} {'name':<25} {'Memory':>8}")
+    print("-" * 43)
+    for process_info in top_processes:
+        pid = process_info["pid"]
+        name = process_info["name"][:25]
+        memory = process_info["memory_percent"]
+        print(f"{pid:<8} {name:<25} {memory:>7.1f}%")
+
+
+
+        
+
